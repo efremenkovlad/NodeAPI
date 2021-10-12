@@ -1,9 +1,21 @@
 const Task = require('../models/task.model');
+const User = require('../models/user.model')
+const jwt = require('jsonwebtoken');
+
 
 exports.get_all = async function getAll (req, res, next) {
+    const token = req.cookies
+
+    try {    
+        const decoded = jwt.verify(token.jwt, 'net secret')
+    }
+    catch (err){
+        console.log(err)
+    }
 
     const data = await Task.find({});
     res.send(data.map(({ _id, task, isCompleted}) => ({ id: _id, task, isCompleted})))
+
 }
 
 exports.task_add = async function (req, res, next) {

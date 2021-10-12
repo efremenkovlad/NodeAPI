@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser')
+
 
 const task = require('./routes/task.route');
 const user = require('./routes/user.route');
@@ -16,6 +18,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser())
+
 app.use('/tasks', task);
 app.use('/users', user);
 

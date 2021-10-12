@@ -1,31 +1,51 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
+const bcrypt = require('bcrypt')
 
-
-exports.user_login = async function (req, res, next) {
-    const user = new User ({
-        email: req.body.email,
-        login: req.body.loin,
-        password: req.body.password,
-
+const maxAge = 3 * 24 * 60 * 60;
+const createToken = (id) => {
+    return jwt.sign({id}, 'net secret', {
+        expiresIn: maxAge
     });
-    // const data = await user.save()
+};
+
+exports.user_signin = async function (req, res, next) {
+    const {email, password} = req.body
+    const user = await login(email, password);
+    const token = createToken(user._id);
+    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(200).json({ user: user._id });
 }
 
-exports.user_register = async function (req, res, next) {
-    const user = new User ({
-        email: req.body.email,
-        login: req.body.login,
-        password: req.body.password,
-        }
-    );
-    console.log(user)
-    const result = await user.save();
-    if (result.ok) {
-        res.send('Gooood')
-    }
-    // const [err, data] = await user.save().then(data => [null, data]).catch(err => [err, null])
-    // data.send('Goooooood')
+exports.user_signup = async function (req, res, next) {
+    const {email, password} = req.body
+    const login = String(email.split('@', [1]))
+    const user = await User.create({ email, login, password });
+    const token = createToken(user._id);
+    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(201).json({ user: user._id });
 }
+
+async function login (email, password) {
+    const user = await User.findOne({ email });
+    if (user) {
+      const auth = await bcrypt.compare(password, user.password);
+      if (auth) {
+        return user;
+      }
+      throw Error('incorrect password');
+    }
+    throw Error('incorrect email');
+  };
+
+
+
+
+
+
+
+
+
 
 
 exports.users_get = async function (req, res, next) {
@@ -39,3 +59,5 @@ exports.user_delete = async function (req, res, next) {
     );
     res.send(result);
 }
+
+
