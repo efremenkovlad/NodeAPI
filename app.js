@@ -1,30 +1,26 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser')
+const mongoDB = require("./config/mongodb_config");
+const express = require("express");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 
+const { returnErr } = require("./utils/errHandle");
+const config = require("./config/index");
 
-const task = require('./routes/task.route');
-const user = require('./routes/user.route');
+const task = require("./routes/task.route");
+const user = require("./routes/user.route");
 const app = express();
 
-
-const mongoose = require('mongoose');
-let dev_db_url = 'mongodb+srv://mongodb:mongodb987@todo-list.0jjfw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
-const mongoDB = process.env.MONGODB_URI || dev_db_url;
-mongoose.connect(mongoDB);
-mongoose.Promise = global.Promise;
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser())
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-app.use('/tasks', task);
-app.use('/users', user);
+app.use("/tasks", task);
+app.use("/users", user);
 
-let port = 4000;
+app.use(returnErr);
+
+let port = config.port;
 
 app.listen(port, () => {
-    console.log('Server is up and running on port numner ' + port);
+  console.log("Server is up and running on port numner " + port);
 });
